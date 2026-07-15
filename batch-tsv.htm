@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Delimited to Command Converter</title>
+    <style>
+        body {
+            background-color:#000;
+            color:#fff;
+            padding:15px 0 0 30px;
+            font-family:arial;
+        }
+        
+        textarea {
+            border-bottom: 2px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            position: relative;
+            overflow: auto;
+            height: 550px; 
+            width:640px;
+            background-color:#f5f5f5;
+            font-size:16px;
+            font-family:courier;
+            display:block;
+            clear:both;
+            text-align:left;
+        }
+        .text-box.done {
+            opacity: 0.25;
+        }
+        .button-container {
+            margin-top: 10px;
+        }
+        .button-container button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body><center>
+    <h2>Batch TSV - JUN 19 | ANIMA, Ideogram type added </h2>
+    <h4>To use it: Choose > file > download > tab separated values (.tsv)</h4>
+	<p>If a field is missing, make sure the spreadsheet has named tabs with the simple description like 'info' and not the question from the survey, it resets sometimes inexplicably. -cap</p>
+    <input type="file" id="fileInput" accept=".tsv" />
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                try {
+                    processTabDelimited(text);
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    document.getElementById('output').textContent = 'Error processing file. Please check the console for details.';
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function processTabDelimited(text) {
+    const rows = text.split(/\r?\n/).filter(row => row.trim() !== ''); 
+    const headers = rows.shift().split('\t').map(header => header.trim().toLowerCase()); 
+    let output = '';
+
+    rows.forEach(row => {
+        const columns = row.split('\t').map(col => col.trim());
+        if (columns.length < headers.length) {
+            console.warn('Skipping invalid row:', row);
+            return;
+        }
+
+        const rowData = {};
+        headers.forEach((header, index) => {
+            rowData[header] = columns[index] || ''; 
+        });
+
+        const type = (rowData['type'] || '').trim().toUpperCase();
+        const nsfw = (rowData['nsfw'] || '').trim().toLowerCase();
+        const { name, tags, huggingface, info, token, thumbnail, triggers, description, shardgroup, family } = rowData;
+
+        if (name) {
+            let commands = '';
+			if (type.includes('SDXL')) {
+				const conceptType =
+					type.includes('LORA') ? 'lora' :
+					type.includes('INVERSION') ? 'inversion' :
+					'style';
+				commands += `/concept /new:${name} ${conceptType} ${huggingface}\n;;;\n`;
+				commands += `/concept /shardgroup:${name} ${shardgroup || 'SDXL'}\n;;;\n`;
+				commands += `/concept /family:${name} ${family || 'SDXL'}\n;;;\n`;
+				
+            } else if (type.includes('SD15')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : type.includes('INVERSION') ? 'inversion' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'SD15'}\n;;;\n`;
+				commands += `/concept /info:${name} ${info}\n;;;\n`;
+            } else if (type.includes('HUNY')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Huny'}\n;;;\n`;
+            } else if (type.includes('WAN')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Wan'}\n;;;\n`;
+			} else if (type.includes('FLUX2')) {
+				commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+				commands += `/concept /family:${name} ${family || 'Flux2'}\n;;;\n`;
+			} else if (type.includes('FLUX') && !type.includes('FLUX2')) {
+				commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+				commands += `/concept /family:${name} ${family || 'Flux'}\n;;;\n`;
+			} else if (type.includes('ZIB')) {
+				commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+				commands += `/concept /family:${name} ${family || 'Zimage'}\n;;;\n`;
+			} else if (type.includes('LTX2')) {
+				commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+				commands += `/concept /family:${name} ${family || 'Ltx2'}\n;;;\n`;
+            } else if (type.includes('ZIT')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Zimage'}\n;;;\n`;
+            } else if (type.includes('QWEN')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Qwen'}\n;;;\n`;
+            } else if (type.includes('IDEOGRAM')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Ideogram'}\n;;;\n`;
+            } else if (type.includes('CHROMA')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Chroma'}\n;;;\n`;		
+            } else if (type.includes('ANIMA')) {
+                commands += `/concept /new:${name} ${type.includes('LORA') ? 'lora' : 'style'} ${huggingface}\n;;;\n`;
+                commands += `/concept /family:${name} ${family || 'Anima'}\n;;;\n`;
+            }	
+            if (nsfw === 'yes') {
+                commands += `/concept /nsfw:${name} \n;;;\n`;
+            }
+            if (info) {
+                commands += `/concept /info:${name} ${info}\n;;;\n`;
+            }
+            if (token) {
+                commands += `/concept /token:${name} ${token}\n;;;\n`;
+            }
+            if (tags) {
+                commands += `/concept /addtag:${name} ${tags}\n;;;\n`;
+            }
+            if (triggers) {
+                commands += `/concept /triggers:${name} ${triggers}\n;;;\n`;
+            }
+            if (description) {
+                commands += `/concept /description:${name} ${description}\n;;;\n`;
+            }
+            if (thumbnail) {
+                commands += `/concept /example:${name} ${thumbnail}\n\n`;
+            }
+
+            output += `
+                <div class="text-box">
+                    <img src=${thumbnail} width=125px style=margin:20px;>
+                    <textarea readonly>${commands}</textarea>
+                    <div class="button-container">
+                        <button onclick="Snooze(this)">Mark as Done</button>
+                        <button onclick="copyToClipboard(this)">Copy</button>
+                    </div>
+                </div>
+                <hr>
+            `;
+        }
+    });
+
+    document.getElementById('output').innerHTML = output;
+}
+
+
+function copyToClipboard(button) {
+    const textarea = button.parentNode.parentNode.querySelector('textarea');
+    if (!textarea) return;
+
+    navigator.clipboard.writeText(textarea.value).then(() => {
+        // Create a confirmation message
+        let confirmation = document.createElement("span");
+        confirmation.textContent = "Copied!";
+        confirmation.style.color = "#0f0";
+        confirmation.style.marginLeft = "10px";
+        confirmation.style.fontSize = "14px";
+
+        // Remove any existing message first
+        let existingMsg = button.parentNode.querySelector("span");
+        if (existingMsg) existingMsg.remove();
+
+        button.parentNode.appendChild(confirmation);
+
+        // Remove confirmation after 1.5 seconds
+        setTimeout(() => confirmation.remove(), 1500);
+    }).catch(err => console.error("Copy failed:", err));
+}
+
+
+        function Snooze(button) {
+            const textBox = button.closest('.text-box');
+            const isDone = textBox.classList.toggle('done');
+            button.textContent = isDone ? 'Restore' : 'Snooze';
+        };
+    </script>
+</body>
+</html>

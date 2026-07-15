@@ -1,0 +1,34 @@
+TELEGRAM BATCH COMMAND SENDER
+=============================
+
+FOR ANOTHER PC (READ THIS FIRST)
+--------------------------------
+When zipping/sending this folder:
+  YES: .py files, .bat files, requirements.txt, .tsv files
+  NO:  .venv folder  <-- never copy this
+
+On the new PC, use ONE of these:
+
+  EASIEST (recommended):
+    1. INSTALL_SIMPLE.bat
+    2. RUN_SIMPLE.bat
+
+  OR normal install:
+    1. INSTALL.bat
+    2. RUN.bat
+
+IF YOU SEE "Lenovo" OR "Python312" IN AN ERROR
+----------------------------------------------
+You copied .venv from another computer. Fix:
+  1. Delete the .venv folder
+  2. Run INSTALL_SIMPLE.bat
+  3. Use RUN_SIMPLE.bat
+
+EVERY TIME
+----------
+  RUN_SIMPLE.bat   (if you used INSTALL_SIMPLE.bat)
+  RUN.bat          (if you used INSTALL.bat)
+
+PYTHON
+------
+Any Python 3.8+ works. During install check "Add Python to PATH".
